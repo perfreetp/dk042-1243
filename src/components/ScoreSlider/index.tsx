@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Slider } from '@tarojs/components';
+import { View, Text, Slider, Textarea } from '@tarojs/components';
 import styles from './index.module.scss';
 import { Competency } from '@/types';
 

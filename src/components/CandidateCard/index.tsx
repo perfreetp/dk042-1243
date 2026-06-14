@@ -21,15 +21,15 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   isSelected = false,
   onClick
 }) => {
-  const { startNewSession, toggleCandidateSelection } = useInterviewStore();
+  const { startInterview, toggleCompareCandidate } = useInterviewStore();
 
   const handleClick = () => {
     if (showSelect) {
-      toggleCandidateSelection(candidate.id);
+      toggleCompareCandidate(candidate.id);
     } else if (onClick) {
       onClick();
     } else {
-      startNewSession(candidate);
+      startInterview(candidate.id);
       Taro.switchTab({ url: '/pages/interview/index' });
     }
   };

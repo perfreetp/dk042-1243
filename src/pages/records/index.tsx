@@ -3,133 +3,106 @@ import { View, Text, Input, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import RecordItem from '@/components/RecordItem';
-import { mockInterviewRecords, mockDeviationAlerts } from '@/data/interviews';
-import { InterviewRecord } from '@/types';
-import { getRecommendationText, getRecommendationColor } from '@/utils';
+import { useInterviewStore } from '@/store/interview';
+import { mockDeviationAlerts } from '@/data/interviews';
 import classnames from 'classnames';
 
-const filterOptions = [
-  { key: 'all', label: '全部', color: '' },
-  { key: 'strong-hire', label: '强烈推荐', color: '#00B42A' },
-  { key: 'hire', label: '推荐录用', color: '#00B8D9' },
-  { key: 'borderline', label: '待定复核', color: '#FF7D00' },
-  { key: 'no-hire', label: '不予录用', color: '#F53F3F' }
+const recFilters = [
+  { key: 'all', label: '全部' },
+  { key: 'strong-hire', label: '强烈推荐' },
+  { key: 'hire', label: '推荐录用' },
+  { key: 'borderline', label: '待定复核' },
+  { key: 'no-hire', label: '不予录用' }
 ];
 
 const RecordsPage: React.FC = () => {
+  const { interviewRecords } = useInterviewStore();
   const [searchText, setSearchText] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [showDeviation, setShowDeviation] = useState(false);
 
   const stats = useMemo(() => {
-    const total = mockInterviewRecords.length;
-    const avg = Math.round(
-      mockInterviewRecords.reduce((acc, r) => acc + r.overallScore, 0) / total
-    );
-    const passRate = Math.round(
-      (mockInterviewRecords.filter(r =>
-        r.recommendation === 'strong-hire' || r.recommendation === 'hire'
-      ).length / total) * 100
-    );
-    const reviewCount = mockInterviewRecords.reduce(
-      (acc, r) => acc + r.reviewItems.length, 0
-    );
-    return { total, avg, passRate, reviewCount };
-  }, []);
+    const total = interviewRecords.length;
+    const strongHire = interviewRecords.filter(r => r.recommendation === 'strong-hire').length;
+    const hire = interviewRecords.filter(r => r.recommendation === 'hire').length;
+    const borderline = interviewRecords.filter(r => r.recommendation === 'borderline').length;
+    const noHire = interviewRecords.filter(r => r.recommendation === 'no-hire').length;
+    const pendingReview = interviewRecords.filter(r => r.reviewItems && r.reviewItems.length > 0).length;
+    const passRate = total > 0 ? Math.round(((strongHire + hire) / total) * 100) : 0;
 
-  const recordsWithReview = useMemo(() =>
-    mockInterviewRecords.filter(r => r.reviewItems.length > 0), []);
+    return { total, strongHire, hire, borderline, noHire, pendingReview, passRate };
+  }, [interviewRecords]);
 
   const filteredRecords = useMemo(() => {
-    return mockInterviewRecords.filter(r => {
-      const matchFilter = activeFilter === 'all' || r.recommendation === activeFilter;
-      const matchSearch = !searchText ||
+    let list = [...interviewRecords];
+
+    if (activeFilter !== 'all') {
+      list = list.filter(r => r.recommendation === activeFilter);
+    }
+
+    if (searchText) {
+      list = list.filter(r =>
         r.candidateName.includes(searchText) ||
         r.position.includes(searchText) ||
-        r.interviewerName.includes(searchText);
-      return matchFilter && matchSearch;
-    });
-  }, [searchText, activeFilter]);
+        r.interviewerName?.includes(searchText)
+      );
+    }
+
+    const withReview = list.filter(r => r.reviewItems && r.reviewItems.length > 0);
+    const withoutReview = list.filter(r => !r.reviewItems || r.reviewItems.length === 0);
+    return [...withReview, ...withoutReview];
+  }, [interviewRecords, searchText, activeFilter]);
 
   const handleExport = () => {
     Taro.showActionSheet({
-      itemList: ['导出选中记录', '导出全部记录', '导出为Excel', '导出为PDF'],
+      itemList: ['导出 Excel', '导出 PDF', '导出面试纪要'],
       success: (res) => {
-        Taro.showLoading({ title: '正在导出...' });
+        Taro.showLoading({ title: '导出中...' });
         setTimeout(() => {
           Taro.hideLoading();
-          Taro.showToast({
-            title: '导出成功，已保存到本地',
-            icon: 'none',
-            duration: 2000
-          });
-        }, 1500);
+          Taro.showToast({ title: '已生成下载链接', icon: 'success' });
+        }, 1200);
       }
     });
   };
 
-  const handleViewDeviation = () => {
-    Taro.showModal({
-      title: '偏差提醒详情',
-      content: `检测到 ${mockDeviationAlerts.length} 项评分偏差：\n\n` +
-        mockDeviationAlerts.map((a, i) =>
-          `${i + 1}. ${a.dimension}：${a.description}\n建议：${a.suggestion}`
-        ).join('\n\n'),
-      showCancel: false,
-      confirmText: '知道了',
-      confirmColor: '#1E5EFF'
-    });
-  };
-
-  const handlePullDownRefresh = () => {
-    setTimeout(() => {
-      Taro.stopPullDownRefresh();
-      Taro.showToast({ title: '刷新成功', icon: 'success' });
-    }, 1000);
-  };
-
   return (
-    <View className={styles.pageContainer} onPullDownRefresh={handlePullDownRefresh}>
+    <View className={styles.pageContainer}>
       <View style={{ padding: `0 ${32}rpx`, paddingTop: 32 }}>
         <Text className="pageTitle">面试记录</Text>
-        <Text className="pageSubtitle">共 {stats.total} 份面试纪要，平均 {stats.avg} 分</Text>
+        <Text className="pageSubtitle">共 {stats.total} 份面试纪要，通过率 {stats.passRate}%</Text>
 
-        <View className={styles.statsCards}>
-          <View className={styles.statsItem}>
-            <Text className={styles.statsValue} style={{ color: '#1E5EFF' }}>
-              {stats.total}
-            </Text>
-            <Text className={styles.statsLabel}>面试总数</Text>
+        <View className={styles.alertEntry} onClick={() => setShowDeviation(true)}>
+          <View className={styles.alertLeft}>
+            <Text className={styles.alertIcon}>⚠️</Text>
+            <View className={styles.alertInfo}>
+              <Text className={styles.alertTitle}>面试官偏差提醒</Text>
+              <Text className={styles.alertDesc}>
+                检测到 {mockDeviationAlerts.length} 个校准点，建议查看
+              </Text>
+            </View>
           </View>
-          <View className={styles.statsItem}>
-            <Text className={styles.statsValue} style={{ color: '#00B42A' }}>
-              {stats.passRate}%
-            </Text>
-            <Text className={styles.statsLabel}>通过率</Text>
-          </View>
-          <View className={styles.statsItem}>
-            <Text className={styles.statsValue} style={{ color: '#FF7D00' }}>
-              {stats.reviewCount}
-            </Text>
-            <Text className={styles.statsLabel}>待复核项</Text>
-          </View>
+          <Text className={styles.alertArrow}>→</Text>
         </View>
 
-        {mockDeviationAlerts.length > 0 && (
-          <View className={styles.deviationAlert} onClick={handleViewDeviation}>
-            <View className={styles.alertLeft}>
-              <Text className={styles.alertIcon}>⚠️</Text>
-              <View className={styles.alertContent}>
-                <Text className={styles.alertTitle}>
-                  检测到 {mockDeviationAlerts.length} 项评分偏差
-                </Text>
-                <Text className={styles.alertDesc}>
-                  建议在面试官校准会议上讨论对齐
-                </Text>
-              </View>
-            </View>
-            <Text className={styles.alertAction}>查看</Text>
+        <View className={styles.statsRow}>
+          <View className={styles.statItem}>
+            <Text className={styles.statValue} style={{ color: '#00B42A' }}>{stats.strongHire}</Text>
+            <Text className={styles.statLabel}>强烈推荐</Text>
           </View>
-        )}
+          <View className={styles.statItem}>
+            <Text className={styles.statValue} style={{ color: '#00B8D9' }}>{stats.hire}</Text>
+            <Text className={styles.statLabel}>推荐录用</Text>
+          </View>
+          <View className={styles.statItem}>
+            <Text className={styles.statValue} style={{ color: '#FF7D00' }}>{stats.borderline}</Text>
+            <Text className={styles.statLabel}>待定复核</Text>
+          </View>
+          <View className={styles.statItem}>
+            <Text className={styles.statValue} style={{ color: '#F53F3F' }}>{stats.noHire}</Text>
+            <Text className={styles.statLabel}>不予录用</Text>
+          </View>
+        </View>
 
         <View className={styles.toolbar}>
           <View className={styles.searchBox}>
@@ -147,48 +120,73 @@ const RecordsPage: React.FC = () => {
         </View>
 
         <View className={styles.filterTabs}>
-          {filterOptions.map(opt => (
+          {recFilters.map(f => (
             <View
-              key={opt.key}
-              className={classnames(styles.filterTab, activeFilter === opt.key && styles.active)}
-              style={activeFilter === opt.key && opt.color ? {
-                background: `linear-gradient(135deg, ${opt.color} 0%, ${opt.color}CC 100%)`
-              } : {}}
-              onClick={() => setActiveFilter(opt.key)}
+              key={f.key}
+              className={classnames(styles.filterTab, activeFilter === f.key && styles.active)}
+              onClick={() => setActiveFilter(f.key)}
             >
-              {opt.label}
+              {f.label}
             </View>
           ))}
         </View>
-
-        {recordsWithReview.length > 0 && (
-          <View className={styles.reviewSection}>
-            <View className={styles.reviewTitle}>
-              <Text>需要复核的面试</Text>
-              <Text className={styles.count}>{recordsWithReview.length} 份</Text>
-            </View>
-            {recordsWithReview.map(record => (
-              <RecordItem key={`review-${record.id}`} record={record} />
-            ))}
-          </View>
-        )}
 
         <View className={styles.sectionHeader}>
           <Text className={styles.sectionTitle}>面试纪要列表</Text>
           <Text className={styles.sectionCount}>{filteredRecords.length} 份</Text>
         </View>
+      </View>
 
+      <View style={{ padding: `0 ${32}rpx` }}>
         {filteredRecords.length > 0 ? (
           filteredRecords.map(record => (
             <RecordItem key={record.id} record={record} />
           ))
         ) : (
           <View className={styles.emptyState}>
-            <Text className={styles.emptyIcon}>📋</Text>
-            <Text className={styles.emptyText}>暂无符合条件的面试记录</Text>
+            <Text className={styles.emptyIcon}>📝</Text>
+            <Text className={styles.emptyText}>暂无面试记录</Text>
+            <Text className={styles.emptyDesc}>完成面试并提交评分后，记录将显示在这里</Text>
           </View>
         )}
       </View>
+
+      {showDeviation && (
+        <View className={styles.modalMask} onClick={() => setShowDeviation(false)}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>面试官偏差提醒</Text>
+              <Text className={styles.modalClose} onClick={() => setShowDeviation(false)}>×</Text>
+            </View>
+
+            <View style={{ padding: '0 32rpx 32rpx' }}>
+              {mockDeviationAlerts.map((alert, i) => (
+                <View key={i} className={styles.deviationItem}>
+                  <View className={styles.deviationHeader}>
+                    <View
+                      className={styles.severityBadge}
+                      style={{
+                        backgroundColor: alert.severity === 'high' ? '#FFECE8' :
+                          alert.severity === 'medium' ? '#FFF7E6' : '#E8F3FF',
+                        color: alert.severity === 'high' ? '#F53F3F' :
+                          alert.severity === 'medium' ? '#FF7D00' : '#1E5EFF'
+                      }}
+                    >
+                      {alert.severity === 'high' ? '严重' : alert.severity === 'medium' ? '中等' : '轻微'}
+                    </View>
+                    <Text className={styles.deviationTitle}>{alert.title}</Text>
+                  </View>
+                  <Text className={styles.deviationDesc}>{alert.description}</Text>
+                  <View className={styles.deviationSuggestion}>
+                    <Text className={styles.suggestionLabel}>校准建议：</Text>
+                    <Text className={styles.suggestionText}>{alert.calibrationTip}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

@@ -1,3 +1,5 @@
+import Taro from '@tarojs/taro';
+
 export const formatDate = (dateStr: string, format: string = 'YYYY-MM-DD'): string => {
   const date = new Date(dateStr);
   const year = date.getFullYear();
@@ -97,4 +99,39 @@ export const getSeverityColor = (severity: string): string => {
     low: '#1E5EFF'
   };
   return map[severity] || '#86909C';
+};
+
+const STORAGE_PREFIX = 'ai_interviewer_';
+
+export const storage = {
+  get<T>(key: string, defaultValue: T): T {
+    try {
+      const fullKey = STORAGE_PREFIX + key;
+      const data = Taro.getStorageSync(fullKey);
+      if (data === '' || data === undefined || data === null) {
+        return defaultValue;
+      }
+      return typeof data === 'string' ? JSON.parse(data) : data;
+    } catch {
+      return defaultValue;
+    }
+  },
+
+  set(key: string, value: unknown): void {
+    try {
+      const fullKey = STORAGE_PREFIX + key;
+      Taro.setStorageSync(fullKey, JSON.stringify(value));
+    } catch (e) {
+      console.error('Storage set error:', e);
+    }
+  },
+
+  remove(key: string): void {
+    try {
+      const fullKey = STORAGE_PREFIX + key;
+      Taro.removeStorageSync(fullKey);
+    } catch (e) {
+      console.error('Storage remove error:', e);
+    }
+  }
 };

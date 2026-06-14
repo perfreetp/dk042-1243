@@ -7,9 +7,8 @@ import TagBadge from '@/components/TagBadge';
 import RadarChart from '@/components/RadarChart';
 import { useInterviewStore } from '@/store/interview';
 import { mockCompetencies } from '@/data/templates';
-import { mockScores } from '@/data/interviews';
 import { ScoreDimension } from '@/types';
-import { calculateOverallScore, getRecommendationText, getRecommendationColor } from '@/utils';
+import { getRecommendationText, getRecommendationColor, calculateOverallScore } from '@/utils';
 import classnames from 'classnames';
 
 const recOptions = [
@@ -20,29 +19,41 @@ const recOptions = [
 ];
 
 const ScoringPage: React.FC = () => {
-  const { currentCandidate, setScores, setOverallScore, setRecommendation, setSummary } = useInterviewStore();
+  const {
+    currentCandidate,
+    currentSession,
+    setScores,
+    setOverallScore,
+    setRecommendation,
+    setSummary,
+    submitInterview
+  } = useInterviewStore();
 
   const [scores, setLocalScores] = useState<ScoreDimension[]>(() =>
-    mockCompetencies.map(comp => {
-      const existing = mockScores.find(s => s.competencyId === comp.id);
-      return existing || {
-        competencyId: comp.id,
-        score: 7,
-        maxScore: 10,
-        reason: ''
-      };
-    })
+    currentSession.scores?.length > 0 ? currentSession.scores :
+    mockCompetencies.map(comp => ({
+      competencyId: comp.id,
+      score: 7,
+      maxScore: 10,
+      reason: ''
+    }))
   );
-  const [recommendation, setLocalRecommendation] = useState<string>('hire');
-  const [summary, setLocalSummary] = useState('');
+
+  const [recommendation, setLocalRecommendation] = useState<string>(
+    currentSession.recommendation || 'borderline'
+  );
+  const [summary, setLocalSummary] = useState<string>(currentSession.summary || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const competencies = mockCompetencies;
 
   const overallScore = useMemo(() => {
     const weighted = scores.map((s, i) => ({
       ...s,
-      weight: mockCompetencies[i]?.weight || 1
+      weight: competencies[i]?.weight || 1
     }));
     return calculateOverallScore(weighted);
-  }, [scores]);
+  }, [scores, competencies]);
 
   const scoreLevel = useMemo(() => {
     if (overallScore >= 90) return { text: 'S级 · 卓越', rank: '超过95%的候选人' };
@@ -88,16 +99,18 @@ const ScoringPage: React.FC = () => {
       const rec = recOptions.find(r => r.key === recommendation);
       const highlights = scores
         .filter(s => s.score >= 8)
-        .map(s => mockCompetencies.find(c => c.id === s.competencyId)?.name)
+        .map(s => competencies.find(c => c.id === s.competencyId)?.name)
         .filter(Boolean);
       const improvements = scores
         .filter(s => s.score <= 6)
-        .map(s => mockCompetencies.find(c => c.id === s.competencyId)?.name)
+        .map(s => competencies.find(c => c.id === s.competencyId)?.name)
         .filter(Boolean);
 
       const generated = `${currentCandidate?.name || '候选人'}综合得分为${overallScore}分（${scoreLevel.text}），整体表现${overallScore >= 75 ? '优秀，达到岗位要求' : '尚可，部分维度需加强'}。
-\n主要优势体现在${highlights.length > 0 ? highlights.join('、') : '综合能力均衡'}等方面。
-${improvements.length > 0 ? `建议在${improvements.join('、')}等方面进一步评估和考察。\n` : ''}
+
+主要优势体现在${highlights.length > 0 ? highlights.join('、') : '综合能力均衡'}等方面。
+${improvements.length > 0 ? `建议在${improvements.join('、')}等方面进一步评估和考察。
+` : ''}
 综合评价：${rec?.label}，${overallScore >= 70 ? '建议' : '不建议'}进入下一环节。`;
 
       setLocalSummary(generated);
@@ -106,7 +119,9 @@ ${improvements.length > 0 ? `建议在${improvements.join('、')}等方面进一
   };
 
   const handleSubmit = () => {
-    const missingReasons = scores.filter(s => !s.reason.trim() && s.score !== 7);
+    if (isSubmitting) return;
+
+    const missingReasons = scores.filter(s => !s.reason?.trim() && s.score !== 7);
     if (missingReasons.length > 0) {
       Taro.showModal({
         title: '评分提醒',
@@ -124,14 +139,29 @@ ${improvements.length > 0 ? `建议在${improvements.join('、')}等方面进一
   };
 
   const doSubmit = () => {
+    setIsSubmitting(true);
     Taro.showLoading({ title: '提交中...' });
+
     setTimeout(() => {
-      Taro.hideLoading();
-      Taro.showToast({ title: '评分提交成功', icon: 'success' });
-      setTimeout(() => {
-        Taro.switchTab({ url: '/pages/records/index' });
-      }, 1500);
-    }, 1000);
+      try {
+        const record = submitInterview();
+        Taro.hideLoading();
+        setIsSubmitting(false);
+
+        if (record) {
+          Taro.showToast({ title: '评分提交成功', icon: 'success' });
+          setTimeout(() => {
+            Taro.switchTab({ url: '/pages/records/index' });
+          }, 1000);
+        } else {
+          Taro.showToast({ title: '提交失败，请重试', icon: 'none' });
+        }
+      } catch (e) {
+        Taro.hideLoading();
+        setIsSubmitting(false);
+        Taro.showToast({ title: '提交失败', icon: 'none' });
+      }
+    }, 800);
   };
 
   return (
@@ -190,11 +220,11 @@ ${improvements.length > 0 ? `建议在${improvements.join('、')}等方面进一
         <View className={styles.sectionHeader}>
           <Text className={styles.sectionTitle}>
             多维度评分
-            <Text className={styles.badge}>{mockCompetencies.length}项</Text>
+            <Text className={styles.badge}>{competencies.length}项</Text>
           </Text>
         </View>
 
-        {mockCompetencies.map((comp, i) => {
+        {competencies.map((comp, i) => {
           const scoreData = scores.find(s => s.competencyId === comp.id);
           return (
             <ScoreSlider
@@ -222,7 +252,6 @@ ${improvements.length > 0 ? `建议在${improvements.join('、')}等方面进一
                 key={opt.key}
                 className={classnames(styles.recOption, recommendation === opt.key && styles.active)}
                 style={{
-                  color: opt.color,
                   borderColor: recommendation === opt.key ? opt.color : 'transparent'
                 }}
                 onClick={() => setLocalRecommendation(opt.key)}
@@ -276,8 +305,12 @@ ${improvements.length > 0 ? `建议在${improvements.join('、')}等方面进一
             {getRecommendationText(recommendation)}
           </Text>
         </View>
-        <Button className={styles.submitBtn} onClick={handleSubmit}>
-          提交评分
+        <Button
+          className={styles.submitBtn}
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? '提交中...' : '提交评分'}
         </Button>
       </View>
     </View>

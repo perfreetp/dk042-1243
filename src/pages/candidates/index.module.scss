@@ -164,3 +164,145 @@
   color: $color-text-tertiary;
   line-height: $line-height-normal;
 }
+
+.emptyBtn {
+  @include button-reset;
+  margin-top: $spacing-lg;
+  padding: $spacing-sm $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+}
+
+.modalContent {
+  width: 100%;
+  max-height: 80vh;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+  position: sticky;
+  top: 0;
+  background: $color-bg-card;
+  z-index: 1;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.modalClose {
+  font-size: 48rpx;
+  color: $color-text-tertiary;
+  line-height: 1;
+}
+
+.formGroup {
+  padding: 0 $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: row;
+  padding: 0 $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.formInput {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.modalFooter {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  border-top: 1rpx solid $color-divider;
+  position: sticky;
+  bottom: 0;
+  background: $color-bg-card;
+}
+
+.modalBtn {
+  @include button-reset;
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+}
+
+.cancelBtn {
+  background: $color-bg-page;
+  color: $color-text-secondary;
+}
+
+.confirmBtn {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  box-shadow: 0 4rpx 16rpx rgba(30, 94, 255, 0.25);
+}
+
+.batchTip {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  padding: 0 $spacing-lg;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.batchTextarea {
+  width: 100%;
+  min-height: 300rpx;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: 1.8;
+  box-sizing: border-box;
+}
