@@ -1,338 +1,406 @@
-@use '@/styles/variables.scss' as *;
-
-.pageContainer {
+.container {
   min-height: 100vh;
-  padding-bottom: $spacing-xl;
-  background: linear-gradient(180deg, #EEF2FF 0%, $color-bg-page 350rpx);
+  padding: 24rpx;
+  padding-bottom: 160rpx;
+  background: #F7F8FA;
 }
 
-.statsCards {
-  display: flex;
-  flex-direction: row;
-  gap: $spacing-md;
-  margin-bottom: $spacing-lg;
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  margin-bottom: 24rpx;
+  color: #fff;
+
+  .title {
+    font-size: 44rpx;
+    font-weight: 700;
+    margin-bottom: 8rpx;
+  }
+
+  .subtitle {
+    font-size: 26rpx;
+    opacity: 0.9;
+  }
 }
 
-.statsItem {
-  flex: 1;
-  background: $color-bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-md;
-  box-shadow: $shadow-card;
+.alertEntry {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
+  cursor: pointer;
+
+  .alertLeft {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+  }
+
+  .alertIcon {
+    font-size: 40rpx;
+  }
+
+  .alertTitle {
+    font-size: 28rpx;
+    font-weight: 600;
+    color: #1D2129;
+    margin-bottom: 4rpx;
+    display: block;
+  }
+
+  .alertDesc {
+    font-size: 24rpx;
+    color: #86909C;
+    display: block;
+  }
+
+  .alertArrow {
+    font-size: 32rpx;
+    color: #86909C;
+  }
 }
 
-.statsValue {
-  font-size: 44rpx;
-  font-weight: $font-weight-bold;
-  line-height: 1.2;
-  display: block;
-}
+.statsRow {
+  display: flex;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 20rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 
-.statsLabel {
-  font-size: $font-size-xs;
-  color: $color-text-tertiary;
-  margin-top: 4rpx;
-  display: block;
+  .statItem {
+    flex: 1;
+    text-align: center;
+
+    .statValue {
+      font-size: 40rpx;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4rpx;
+    }
+
+    .statLabel {
+      font-size: 22rpx;
+      color: #86909C;
+    }
+  }
 }
 
 .toolbar {
   display: flex;
-  flex-direction: row;
-  gap: $spacing-md;
-  margin-bottom: $spacing-lg;
-}
-
-.searchBox {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
   align-items: center;
-  background: $color-bg-card;
-  border-radius: $radius-button;
-  padding: 0 $spacing-lg;
-  height: 80rpx;
-  box-shadow: $shadow-card;
+
+  .searchBox {
+    flex: 1;
+    height: 72rpx;
+    background: #fff;
+    border-radius: 36rpx;
+    padding: 0 24rpx;
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+
+    .searchIcon {
+      font-size: 28rpx;
+    }
+
+    .searchInput {
+      flex: 1;
+      font-size: 26rpx;
+    }
+  }
+
+  .filterBtn {
+    height: 72rpx;
+    padding: 0 24rpx;
+    background: #fff;
+    border-radius: 36rpx;
+    display: flex;
+    align-items: center;
+    font-size: 26rpx;
+    color: #4E5969;
+    border: 2rpx solid #E5E6EB;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+
+    text {
+      font-weight: 500;
+    }
+  }
+
+  .exportBtn {
+    height: 72rpx;
+    padding: 0 28rpx;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 36rpx;
+    display: flex;
+    align-items: center;
+
+    text {
+      color: #fff;
+      font-size: 26rpx;
+      font-weight: 600;
+    }
+  }
 }
 
-.searchIcon {
-  font-size: 32rpx;
-  margin-right: $spacing-sm;
-  color: $color-text-tertiary;
-}
+.filterPanel {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 
-.searchInput {
-  flex: 1;
-  height: 100%;
-  font-size: $font-size-md;
-  color: $color-text-primary;
-}
+  .filterRow {
+    margin-bottom: 20rpx;
 
-.exportBtn {
-  @include button-reset;
-  height: 80rpx;
-  padding: 0 $spacing-lg;
-  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
-  border-radius: $radius-button;
-  color: $color-text-white;
-  font-size: $font-size-md;
-  font-weight: $font-weight-medium;
-  white-space: nowrap;
-  box-shadow: 0 4rpx 16rpx rgba(0, 184, 217, 0.25);
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 
-  &:active {
-    opacity: 0.9;
-    transform: scale(0.96);
+  .filterLabel {
+    font-size: 26rpx;
+    font-weight: 600;
+    color: #1D2129;
+    margin-bottom: 12rpx;
+    display: block;
+  }
+
+  .filterChips {
+    display: flex;
+    gap: 12rpx;
+    white-space: nowrap;
+
+    .filterChip {
+      display: inline-block;
+      padding: 12rpx 24rpx;
+      background: #F7F8FA;
+      border-radius: 24rpx;
+      font-size: 24rpx;
+      color: #4E5969;
+      border: 2rpx solid transparent;
+      flex-shrink: 0;
+      cursor: pointer;
+
+      &.active {
+        background: #E8F3FF;
+        color: #1E5EFF;
+        border-color: #1E5EFF;
+      }
+    }
+
+    .emptyHint {
+      font-size: 24rpx;
+      color: #86909C;
+    }
+  }
+
+  .resetRow {
+    margin-top: 16rpx;
+    text-align: center;
+
+    .resetBtn {
+      font-size: 24rpx;
+      color: #1E5EFF;
+    }
   }
 }
 
 .filterTabs {
   display: flex;
-  flex-direction: row;
-  gap: $spacing-sm;
-  margin-bottom: $spacing-lg;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
   overflow-x: auto;
-  white-space: nowrap;
-}
 
-.filterTab {
-  display: inline-flex;
-  padding: 12rpx 28rpx;
-  border-radius: $radius-button;
-  background: $color-bg-card;
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-  font-weight: $font-weight-medium;
-  transition: all $transition-base;
-  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
-  flex-shrink: 0;
+  .filterTab {
+    padding: 14rpx 28rpx;
+    background: #fff;
+    border-radius: 28rpx;
+    font-size: 26rpx;
+    color: #4E5969;
+    flex-shrink: 0;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.03);
+    cursor: pointer;
 
-  &.active {
-    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
-    color: $color-text-white;
-    box-shadow: 0 4rpx 12rpx rgba(30, 94, 255, 0.2);
-  }
+    &.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
-  &:active {
-    transform: scale(0.96);
+      text {
+        color: #fff;
+        font-weight: 600;
+      }
+    }
   }
 }
 
-.deviationAlert {
-  background: linear-gradient(135deg, #FFF7E6 0%, #FFF3DC 100%);
-  border-radius: $radius-lg;
-  padding: $spacing-md $spacing-lg;
-  margin-bottom: $spacing-lg;
-  border-left: 8rpx solid $color-warning;
-  box-shadow: $shadow-card;
+.listHeader {
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: space-between;
-}
-
-.alertLeft {
-  display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: $spacing-sm;
-  flex: 1;
-  min-width: 0;
-}
+  margin-bottom: 16rpx;
 
-.alertIcon {
-  font-size: 40rpx;
-  flex-shrink: 0;
-}
-
-.alertContent {
-  flex: 1;
-  min-width: 0;
-}
-
-.alertTitle {
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  display: block;
-  margin-bottom: 4rpx;
-}
-
-.alertDesc {
-  font-size: $font-size-xs;
-  color: $color-warning;
-}
-
-.alertAction {
-  flex-shrink: 0;
-  padding: 8rpx 24rpx;
-  background: $color-warning;
-  color: $color-text-white;
-  border-radius: $radius-button;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-}
-
-.sectionHeader {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: $spacing-md;
-  padding: 0 $spacing-xs;
-}
-
-.sectionTitle {
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-}
-
-.sectionCount {
-  font-size: $font-size-sm;
-  color: $color-text-tertiary;
-  background: rgba(134, 144, 156, 0.1);
-  padding: 4rpx 16rpx;
-  border-radius: $radius-xs;
-}
-
-.reviewSection {
-  margin-bottom: $spacing-lg;
-}
-
-.reviewTitle {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: $spacing-xs;
-  margin-bottom: $spacing-md;
-  padding: 0 $spacing-xs;
-
-  text {
-    font-size: $font-size-lg;
-    font-weight: $font-weight-semibold;
-    color: $color-text-primary;
+  .listTitle {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #1D2129;
   }
 
-  .count {
-    background: rgba(255, 125, 0, 0.1);
-    color: $color-warning;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-semibold;
-    padding: 4rpx 20rpx;
-    border-radius: $radius-button;
+  .listCount {
+    font-size: 26rpx;
+    color: #86909C;
+  }
+}
+
+.recordCard {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+
+  .recordHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16rpx;
+
+    .recordMain {
+      display: flex;
+      align-items: center;
+      gap: 16rpx;
+    }
+
+    .avatar {
+      width: 72rpx;
+      height: 72rpx;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28rpx;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .recordName {
+      font-size: 30rpx;
+      font-weight: 600;
+      color: #1D2129;
+      margin-bottom: 4rpx;
+      display: block;
+    }
+
+    .recordPosition {
+      font-size: 24rpx;
+      color: #86909C;
+      display: block;
+    }
+
+    .recBadge {
+      padding: 8rpx 16rpx;
+      border-radius: 20rpx;
+      font-size: 22rpx;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+  }
+
+  .recordMeta {
+    display: flex;
+    gap: 16rpx;
+    flex-wrap: wrap;
+    margin-bottom: 16rpx;
+
+    .metaItem {
+      font-size: 22rpx;
+      color: #86909C;
+      background: #F7F8FA;
+      padding: 6rpx 14rpx;
+      border-radius: 12rpx;
+    }
+  }
+
+  .recordFooter {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    padding-top: 16rpx;
+    border-top: 1rpx solid #F2F3F5;
+
+    .scoreInfo {
+      display: flex;
+      align-items: baseline;
+      gap: 4rpx;
+
+      .scoreNum {
+        font-size: 36rpx;
+        font-weight: 700;
+        color: #1E5EFF;
+      }
+
+      .scoreLabel {
+        font-size: 22rpx;
+        color: #86909C;
+      }
+    }
+
+    .reviewBadge {
+      background: #FFF7E8;
+      color: #FF7D00;
+      padding: 6rpx 14rpx;
+      border-radius: 12rpx;
+
+      text {
+        font-size: 22rpx;
+      }
+    }
+
+    .recordDate {
+      margin-left: auto;
+      font-size: 22rpx;
+      color: #86909C;
+    }
   }
 }
 
 .emptyState {
-  padding: $spacing-xl * 2;
   text-align: center;
-  background: $color-bg-card;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-card;
-}
+  padding: 80rpx 40rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 
-.emptyIcon {
-  font-size: 80rpx;
-  margin-bottom: $spacing-md;
-  display: block;
-}
+  .emptyIcon {
+    font-size: 80rpx;
+    display: block;
+    margin-bottom: 20rpx;
+  }
 
-.emptyText {
-  font-size: $font-size-md;
-  color: $color-text-tertiary;
-  line-height: $line-height-normal;
-}
+  .emptyText {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: #1D2129;
+    display: block;
+    margin-bottom: 8rpx;
+  }
 
-.emptyDesc {
-  font-size: $font-size-sm;
-  color: $color-text-tertiary;
-  line-height: $line-height-normal;
-  margin-top: $spacing-sm;
-  display: block;
-}
-
-.alertEntry {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(135deg, #FFF7E6 0%, #FFEFD6 100%);
-  border-radius: $radius-lg;
-  padding: $spacing-md $spacing-lg;
-  margin-bottom: $spacing-lg;
-  box-shadow: $shadow-card;
-  border-left: 8rpx solid $color-warning;
-}
-
-.alertLeft {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: $spacing-md;
-  flex: 1;
-  min-width: 0;
-}
-
-.alertIcon {
-  font-size: 48rpx;
-  flex-shrink: 0;
-}
-
-.alertInfo {
-  flex: 1;
-  min-width: 0;
-}
-
-.alertTitle {
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  display: block;
-  margin-bottom: 4rpx;
-}
-
-.alertDesc {
-  font-size: $font-size-xs;
-  color: $color-text-secondary;
-}
-
-.alertArrow {
-  font-size: 32rpx;
-  color: $color-text-tertiary;
-  flex-shrink: 0;
-}
-
-.statsRow {
-  display: flex;
-  flex-direction: row;
-  gap: $spacing-sm;
-  margin-bottom: $spacing-lg;
-}
-
-.statItem {
-  flex: 1;
-  background: $color-bg-card;
-  border-radius: $radius-md;
-  padding: $spacing-md $spacing-sm;
-  text-align: center;
-  box-shadow: $shadow-card;
-}
-
-.statValue {
-  font-size: 40rpx;
-  font-weight: $font-weight-bold;
-  display: block;
-  line-height: 1.2;
-}
-
-.statLabel {
-  font-size: $font-size-xs;
-  color: $color-text-tertiary;
-  margin-top: 4rpx;
-  display: block;
+  .emptyDesc {
+    font-size: 26rpx;
+    color: #86909C;
+    display: block;
+    line-height: 1.6;
+  }
 }
 
 .modalMask {
@@ -342,102 +410,102 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: $spacing-lg;
+  z-index: 1000;
+  padding: 32rpx;
 }
 
 .modalContent {
   width: 100%;
   max-height: 80vh;
-  background: $color-bg-card;
-  border-radius: $radius-xl;
-  overflow-y: auto;
-  overflow-x: hidden;
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modalHeader {
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: space-between;
-  padding: $spacing-lg;
-  border-bottom: 1rpx solid $color-divider;
-  position: sticky;
-  top: 0;
-  background: $color-bg-card;
-  z-index: 1;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #F2F3F5;
+  flex-shrink: 0;
+
+  .modalTitle {
+    font-size: 34rpx;
+    font-weight: 600;
+    color: #1D2129;
+  }
+
+  .modalClose {
+    font-size: 48rpx;
+    color: #86909C;
+    line-height: 1;
+    cursor: pointer;
+  }
 }
 
-.modalTitle {
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-}
-
-.modalClose {
-  font-size: 48rpx;
-  color: $color-text-tertiary;
-  line-height: 1;
+.modalBody {
+  flex: 1;
+  padding: 20rpx 32rpx 32rpx;
+  overflow-y: auto;
 }
 
 .deviationItem {
-  background: $color-bg-page;
-  border-radius: $radius-md;
-  padding: $spacing-md;
-  margin-bottom: $spacing-md;
-}
+  background: #F7F8FA;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
 
-.deviationHeader {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: $spacing-sm;
-  margin-bottom: $spacing-sm;
-}
+  .deviationHeader {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    margin-bottom: 12rpx;
+  }
 
-.severityBadge {
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-  padding: 4rpx 16rpx;
-  border-radius: $radius-xs;
-  flex-shrink: 0;
-}
+  .severityBadge {
+    padding: 6rpx 16rpx;
+    border-radius: 12rpx;
+    font-size: 22rpx;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
 
-.deviationTitle {
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  flex: 1;
-}
+  .deviationTitle {
+    font-size: 28rpx;
+    font-weight: 600;
+    color: #1D2129;
+  }
 
-.deviationDesc {
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-  line-height: $line-height-normal;
-  margin-bottom: $spacing-sm;
-  display: block;
-}
+  .deviationDesc {
+    font-size: 26rpx;
+    color: #4E5969;
+    line-height: 1.6;
+    margin-bottom: 16rpx;
+    display: block;
+  }
 
-.deviationSuggestion {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 4rpx;
-}
+  .deviationSuggestion {
+    background: #fff;
+    padding: 16rpx 20rpx;
+    border-radius: 12rpx;
+    border-left: 4rpx solid #1E5EFF;
 
-.suggestionLabel {
-  font-size: $font-size-xs;
-  color: $color-primary;
-  font-weight: $font-weight-medium;
-  flex-shrink: 0;
-}
+    .suggestionLabel {
+      font-size: 24rpx;
+      color: #1E5EFF;
+      font-weight: 600;
+    }
 
-.suggestionText {
-  font-size: $font-size-xs;
-  color: $color-text-secondary;
-  line-height: $line-height-normal;
-  flex: 1;
+    .suggestionText {
+      font-size: 24rpx;
+      color: #4E5969;
+      line-height: 1.6;
+    }
+  }
 }

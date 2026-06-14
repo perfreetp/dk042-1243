@@ -27,7 +27,8 @@ export interface Question {
   id: string;
   content: string;
   type: 'required' | 'followup' | 'ai-generated';
-  competencyId: string;
+  competencyIds: string[];
+  keyPoints?: string[];
   sampleAnswer?: string;
   scoringGuide?: string;
 }
@@ -51,8 +52,12 @@ export interface InterviewSession {
   id: string;
   candidateId: string;
   templateId: string;
+  templateName: string;
   position: string;
   interviewer: string;
+  interviewerName: string;
+  round: number;
+  totalRounds: number;
   startTime: string;
   endTime?: string;
   status: 'preparing' | 'in-progress' | 'scoring' | 'completed';
@@ -72,9 +77,11 @@ export interface InterviewTemplate {
   name: string;
   position: string;
   department: string;
+  description: string;
   competencies: Competency[];
   requiredQuestions: Question[];
   followupQuestions: Question[];
+  scoringDimensions?: ScoreDimension[];
   createdAt: string;
   updatedAt: string;
   usageCount: number;
@@ -88,6 +95,8 @@ export interface InterviewRecord {
   candidateAvatar: string;
   position: string;
   department: string;
+  templateId: string;
+  templateName: string;
   interviewer: string;
   interviewerName: string;
   round: number;
@@ -97,6 +106,8 @@ export interface InterviewRecord {
   overallScore: number;
   recommendation: 'strong-hire' | 'hire' | 'borderline' | 'no-hire';
   summary: string;
+  answers: AnswerRecord[];
+  questions: Question[];
   scores: ScoreDimension[];
   reviewItems: string[];
   exported: boolean;
@@ -114,9 +125,9 @@ export interface CompareItem {
 export interface DeviationAlert {
   id: string;
   type: 'over-score' | 'under-score' | 'inconsistent' | 'missing-evidence';
-  dimension: string;
+  title: string;
   description: string;
-  suggestion: string;
+  calibrationTip: string;
   severity: 'high' | 'medium' | 'low';
 }
 

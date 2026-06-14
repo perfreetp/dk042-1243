@@ -4,7 +4,9 @@ export default defineAppConfig({
     'pages/interview/index',
     'pages/scoring/index',
     'pages/records/index',
-    'pages/analysis/index'
+    'pages/analysis/index',
+    'pages/start-interview/index',
+    'pages/record-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',

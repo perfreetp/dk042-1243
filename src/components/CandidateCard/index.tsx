@@ -21,7 +21,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   isSelected = false,
   onClick
 }) => {
-  const { startInterview, toggleCompareCandidate } = useInterviewStore();
+  const { toggleCompareCandidate } = useInterviewStore();
 
   const handleClick = () => {
     if (showSelect) {
@@ -29,8 +29,9 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
     } else if (onClick) {
       onClick();
     } else {
-      startInterview(candidate.id);
-      Taro.switchTab({ url: '/pages/interview/index' });
+      Taro.navigateTo({
+        url: `/pages/start-interview/index?candidateId=${candidate.id}`
+      });
     }
   };
 

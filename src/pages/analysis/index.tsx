@@ -1,299 +1,687 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Image, Button, ScrollView, Input, Textarea } from '@tarojs/components';
+import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
+import { useInterviewStore } from '../../store/interview';
+import { RADAR_COLORS, getRecommendationText, getRecommendationBgColor, getSeverityColor } from '../../utils';
+import type { Competency, Question } from '../../types';
 import styles from './index.module.scss';
-import RadarChart from '@/components/RadarChart';
-import CandidateCard from '@/components/CandidateCard';
-import { useInterviewStore } from '@/store/interview';
-import { mockCompetencies, mockTemplates } from '@/data/templates';
-import { mockDeviationAlerts } from '@/data/interviews';
-import classnames from 'classnames';
 
-const tabs = [
-  { key: 'compare', label: '多人对比' },
-  { key: 'deviation', label: '偏差提醒' },
-  { key: 'templates', label: '模板库' }
-];
+type TabType = 'compare' | 'calibration' | 'templates';
 
-const AnalysisPage: React.FC = () => {
+export default function Analysis() {
+  const [activeTab, setActiveTab] = useState<TabType>('compare');
+  const [showEditor, setShowEditor] = useState(false);
+  const [showTemplateEditor, setShowTemplateEditor] = useState(false);
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+
   const {
     candidates,
-    interviewRecords,
-    selectedCompareIds,
-    toggleCompareCandidate,
-    setSelectedCompareIds,
     templates,
+    compareCandidateIds,
+    maxCompareCount,
+    currentTemplateId,
+    toggleCompareCandidate,
+    clearCompareCandidates,
+    getCompareList,
+    getDeviationAlerts,
     addTemplate,
-    setCurrentTemplateId
+    updateTemplate,
+    duplicateTemplate,
+    deleteTemplate,
+    setCurrentTemplateId,
+    addCompetencyToTemplate,
+    updateCompetencyInTemplate,
+    deleteCompetencyFromTemplate,
+    addQuestionToTemplate,
+    updateQuestionInTemplate,
+    deleteQuestionFromTemplate
   } = useInterviewStore();
 
-  const [activeTab, setActiveTab] = useState('compare');
-  const [showSelector, setShowSelector] = useState(false);
-  const [showCreateTpl, setShowCreateTpl] = useState(false);
+  const compareList = getCompareList();
+  const alerts = getDeviationAlerts();
 
-  const [tplForm, setTplForm] = useState({
-    name: '',
-    position: '',
-    department: '',
-    description: ''
-  });
+  const radarData = useMemo(() => {
+    if (compareList.length === 0) return { labels: [], datasets: [] };
 
-  const selectedCandidates = useMemo(() => {
-    return candidates.filter(c => selectedCompareIds.includes(c.id)).slice(0, 5);
-  }, [candidates, selectedCompareIds]);
+    const firstRecord = compareList[0].latestRecord;
+    if (!firstRecord) return { labels: [], datasets: [] };
 
-  const compareData = useMemo(() => {
-    return selectedCandidates.map(candidate => {
-      const record = interviewRecords.find(r => r.candidateId === candidate.id);
-      return {
-        candidate,
-        record,
-        scores: record?.scores || mockCompetencies.map(comp => ({
-          competencyId: comp.id,
-          score: 7,
-          maxScore: 10,
-          reason: ''
-        }))
-      };
-    });
-  }, [selectedCandidates, interviewRecords]);
+    const template = templates.find(t => t.id === firstRecord.templateId);
+    const labels = template?.competencies.map(c => c.name) || [];
 
-  const handleUseTemplate = (templateId: string) => {
-    setCurrentTemplateId(templateId);
-    Taro.showToast({ title: '模板已设置', icon: 'success' });
-  };
+    const datasets = compareList.map((item, idx) => ({
+      label: item.candidate.name,
+      color: RADAR_COLORS[idx % RADAR_COLORS.length],
+      values: item.latestRecord?.scores.map(s => s.score) || labels.map(() => 0)
+    }));
 
-  const handleCopyTemplate = (template: any) => {
-    addTemplate({
-      name: template.name + ' (副本)',
-      position: template.position,
-      department: template.department,
-      description: template.description,
-      competencies: template.competencies,
-      requiredQuestions: template.requiredQuestions,
-      followupQuestions: template.followupQuestions,
-      scoringDimensions: template.scoringDimensions
-    });
-    Taro.showToast({ title: '模板已复制', icon: 'success' });
+    return { labels, datasets };
+  }, [compareList, templates]);
+
+  const handleToggleCandidate = (candidateId: string) => {
+    const success = toggleCompareCandidate(candidateId);
+    if (!success) {
+      Taro.showToast({
+        title: `最多只能对比${maxCompareCount}人`,
+        icon: 'none',
+        duration: 1500
+      });
+    }
   };
 
   const handleCreateTemplate = () => {
-    if (!tplForm.name.trim()) {
-      Taro.showToast({ title: '请输入模板名称', icon: 'none' });
-      return;
-    }
-    if (!tplForm.position.trim()) {
-      Taro.showToast({ title: '请输入适用岗位', icon: 'none' });
-      return;
-    }
-
-    addTemplate({
-      name: tplForm.name.trim(),
-      position: tplForm.position.trim(),
-      department: tplForm.department.trim() || '通用',
-      description: tplForm.description.trim(),
-      competencies: mockCompetencies,
-      requiredQuestions: mockTemplates[0]?.requiredQuestions || [],
-      followupQuestions: mockTemplates[0]?.followupQuestions || [],
-      scoringDimensions: mockTemplates[0]?.scoringDimensions || []
-    });
-
-    Taro.showToast({ title: '模板创建成功', icon: 'success' });
-    setShowCreateTpl(false);
-    setTplForm({ name: '', position: '', department: '', description: '' });
+    setEditingTemplateId(null);
+    setShowTemplateEditor(true);
   };
 
-  return (
-    <View className={styles.pageContainer}>
-      <View style={{ padding: `0 ${32}rpx`, paddingTop: 32 }}>
-        <Text className="pageTitle">对比分析</Text>
-        <Text className="pageSubtitle">多人对比、偏差校准、模板管理</Text>
+  const handleEditTemplate = (templateId: string) => {
+    setEditingTemplateId(templateId);
+    setShowTemplateEditor(true);
+  };
 
-        <View className={styles.tabBar}>
-          {tabs.map(tab => (
-            <View
-              key={tab.key}
-              className={classnames(styles.tabItem, activeTab === tab.key && styles.active)}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
+  const handleUseTemplate = (templateId: string) => {
+    setCurrentTemplateId(templateId);
+    Taro.showToast({ title: '已设为当前模板', icon: 'success' });
+  };
+
+  const handleDuplicateTemplate = (templateId: string) => {
+    duplicateTemplate(templateId);
+    Taro.showToast({ title: '已复制', icon: 'success' });
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    Taro.showModal({
+      title: '确认删除',
+      content: '删除后无法恢复，确定要删除该模板吗？',
+      success: (res) => {
+        if (res.confirm) {
+          deleteTemplate(templateId);
+          Taro.showToast({ title: '已删除', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const TemplateEditorContent = () => {
+    const [formData, setFormData] = useState(() => {
+      if (editingTemplateId) {
+        const t = templates.find(t => t.id === editingTemplateId);
+        if (t) return {
+          name: t.name,
+          position: t.position,
+          department: t.department,
+          description: t.description,
+          competencies: [...t.competencies],
+          requiredQuestions: [...t.requiredQuestions],
+          followupQuestions: [...t.followupQuestions]
+        };
+      }
+      return {
+        name: '',
+        position: '',
+        department: '',
+        description: '',
+        competencies: [] as Competency[],
+        requiredQuestions: [] as Question[],
+        followupQuestions: [] as Question[]
+      };
+    });
+
+    const [editingCompetencyId, setEditingCompetencyId] = useState<string | null>(null);
+    const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+    const [questionType, setQuestionType] = useState<'required' | 'followup'>('required');
+
+    const handleSave = () => {
+      if (!formData.name.trim()) {
+        Taro.showToast({ title: '请输入模板名称', icon: 'none' });
+        return;
+      }
+      if (formData.competencies.length === 0) {
+        Taro.showToast({ title: '至少添加一个能力维度', icon: 'none' });
+        return;
+      }
+
+      if (editingTemplateId) {
+        updateTemplate(editingTemplateId, formData);
+        Taro.showToast({ title: '已保存', icon: 'success' });
+      } else {
+        addTemplate(formData);
+        Taro.showToast({ title: '已创建', icon: 'success' });
+      }
+      setShowTemplateEditor(false);
+    };
+
+    const handleAddCompetency = () => {
+      const newComp: Competency = {
+        id: 'temp-' + Date.now(),
+        name: '',
+        description: '',
+        weight: 10
+      };
+      setFormData(prev => ({
+        ...prev,
+        competencies: [...prev.competencies, newComp]
+      }));
+      setEditingCompetencyId(newComp.id);
+    };
+
+    const handleUpdateCompetency = (id: string, updates: Partial<Competency>) => {
+      setFormData(prev => ({
+        ...prev,
+        competencies: prev.competencies.map(c =>
+          c.id === id ? { ...c, ...updates } : c
+        )
+      }));
+    };
+
+    const handleDeleteCompetency = (id: string) => {
+      setFormData(prev => ({
+        ...prev,
+        competencies: prev.competencies.filter(c => c.id !== id)
+      }));
+    };
+
+    const handleAddQuestion = () => {
+      const newQ: Question = {
+        id: 'temp-' + Date.now(),
+        content: '',
+        type: questionType,
+        competencyIds: []
+      };
+      setFormData(prev => ({
+        ...prev,
+        [questionType === 'required' ? 'requiredQuestions' : 'followupQuestions']: [
+          ...prev[questionType === 'required' ? 'requiredQuestions' : 'followupQuestions'],
+          newQ
+        ]
+      }));
+      setEditingQuestionId(newQ.id);
+    };
+
+    const handleUpdateQuestion = (id: string, updates: Partial<Question>) => {
+      setFormData(prev => {
+        const updated = { ...prev };
+        const reqIdx = prev.requiredQuestions.findIndex(q => q.id === id);
+        if (reqIdx !== -1) {
+          updated.requiredQuestions = [...prev.requiredQuestions];
+          updated.requiredQuestions[reqIdx] = { ...prev.requiredQuestions[reqIdx], ...updates };
+          return updated;
+        }
+        const folIdx = prev.followupQuestions.findIndex(q => q.id === id);
+        if (folIdx !== -1) {
+          updated.followupQuestions = [...prev.followupQuestions];
+          updated.followupQuestions[folIdx] = { ...prev.followupQuestions[folIdx], ...updates };
+        }
+        return updated;
+      });
+    };
+
+    const handleDeleteQuestion = (id: string) => {
+      setFormData(prev => ({
+        ...prev,
+        requiredQuestions: prev.requiredQuestions.filter(q => q.id !== id),
+        followupQuestions: prev.followupQuestions.filter(q => q.id !== id)
+      }));
+    };
+
+    const totalWeight = formData.competencies.reduce((sum, c) => sum + c.weight, 0);
+
+    return (
+      <View className={styles.editorOverlay}>
+        <View className={styles.editorPanel}>
+          <View className={styles.editorHeader}>
+            <Text className={styles.editorTitle}>
+              {editingTemplateId ? '编辑模板' : '创建模板'}
+            </Text>
+            <Text className={styles.closeBtn} onClick={() => setShowTemplateEditor(false)}>×</Text>
+          </View>
+
+          <ScrollView className={styles.editorBody} scrollY>
+            <View className={styles.formSection}>
+              <Text className={styles.formLabel}>模板名称 *</Text>
+              <Input
+                className={styles.formInput}
+                placeholder="如：高级Java工程师通用模板"
+                value={formData.name}
+                onInput={e => setFormData(prev => ({ ...prev, name: e.detail.value }))}
+              />
+            </View>
+
+            <View className={styles.formRow}>
+              <View className={styles.formSection} style={{ flex: 1 }}>
+                <Text className={styles.formLabel}>适用岗位</Text>
+                <Input
+                  className={styles.formInput}
+                  placeholder="如：Java工程师"
+                  value={formData.position}
+                  onInput={e => setFormData(prev => ({ ...prev, position: e.detail.value }))}
+                />
+              </View>
+              <View className={styles.formSection} style={{ flex: 1, marginLeft: 20 }}>
+                <Text className={styles.formLabel}>适用部门</Text>
+                <Input
+                  className={styles.formInput}
+                  placeholder="如：技术部"
+                  value={formData.department}
+                  onInput={e => setFormData(prev => ({ ...prev, department: e.detail.value }))}
+                />
+              </View>
+            </View>
+
+            <View className={styles.formSection}>
+              <Text className={styles.formLabel}>模板描述</Text>
+              <Textarea
+                className={styles.formTextarea}
+                placeholder="简要说明模板的适用场景和特点"
+                value={formData.description}
+                onInput={e => setFormData(prev => ({ ...prev, description: e.detail.value }))}
+              />
+            </View>
+
+            <View className={styles.formSection}>
+              <View className={styles.sectionHeader}>
+                <Text className={styles.formLabel}>能力维度配置</Text>
+                <Text className={styles.weightInfo}>权重合计: {totalWeight}</Text>
+                <Text className={styles.addBtn} onClick={handleAddCompetency}>+ 添加</Text>
+              </View>
+
+              {formData.competencies.map((c, idx) => (
+                <View key={c.id} className={styles.competencyItem}>
+                  <View className={styles.competencyHeader}>
+                    <Text className={styles.competencyIndex}>维度 {idx + 1}</Text>
+                    <Text
+                      className={styles.deleteBtn}
+                      onClick={() => handleDeleteCompetency(c.id)}
+                    >删除</Text>
+                  </View>
+                  <View className={styles.competencyBody}>
+                    <Input
+                      className={styles.formInput}
+                      placeholder="维度名称，如：专业技术"
+                      value={c.name}
+                      onInput={e => handleUpdateCompetency(c.id, { name: e.detail.value })}
+                    />
+                    <View className={styles.weightRow}>
+                      <Text className={styles.weightLabel}>权重</Text>
+                      <Input
+                        className={styles.weightInput}
+                        type="number"
+                        value={String(c.weight)}
+                        onInput={e => handleUpdateCompetency(c.id, { weight: parseInt(e.detail.value) || 0 })}
+                      />
+                    </View>
+                    <Textarea
+                      className={styles.formTextarea}
+                      style={{ height: 100 }}
+                      placeholder="维度说明，描述该能力的考察要点"
+                      value={c.description}
+                      onInput={e => handleUpdateCompetency(c.id, { description: e.detail.value })}
+                    />
+                  </View>
+                </View>
+              ))}
+
+              {formData.competencies.length === 0 && (
+                <View className={styles.emptyHint}>
+                  <Text>还没有配置能力维度，点击上方「添加」开始配置</Text>
+                </View>
+              )}
+            </View>
+
+            <View className={styles.formSection}>
+              <View className={styles.sectionHeader}>
+                <Text className={styles.formLabel}>面试题库</Text>
+                <View className={styles.questionTypeTabs}>
+                  <Text
+                    className={`${styles.typeTab} ${questionType === 'required' ? styles.active : ''}`}
+                    onClick={() => setQuestionType('required')}
+                  >必问题</Text>
+                  <Text
+                    className={`${styles.typeTab} ${questionType === 'followup' ? styles.active : ''}`}
+                    onClick={() => setQuestionType('followup')}
+                  >追问题</Text>
+                </View>
+                <Text className={styles.addBtn} onClick={handleAddQuestion}>+ 添加</Text>
+              </View>
+
+              {(questionType === 'required' ? formData.requiredQuestions : formData.followupQuestions).map((q, idx) => (
+                <View key={q.id} className={styles.questionItem}>
+                  <View className={styles.questionHeader}>
+                    <Text className={styles.questionIndex}>Q{idx + 1}</Text>
+                    <Text
+                      className={styles.deleteBtn}
+                      onClick={() => handleDeleteQuestion(q.id)}
+                    >删除</Text>
+                  </View>
+                  <Textarea
+                    className={styles.formTextarea}
+                    style={{ height: 120 }}
+                    placeholder="请输入面试问题"
+                    value={q.content}
+                    onInput={e => handleUpdateQuestion(q.id, { content: e.detail.value })}
+                  />
+                </View>
+              ))}
+
+              {(questionType === 'required' ? formData.requiredQuestions : formData.followupQuestions).length === 0 && (
+                <View className={styles.emptyHint}>
+                  <Text>还没有配置{questionType === 'required' ? '必问题' : '追问题'}，点击上方「添加」开始配置</Text>
+                </View>
+              )}
+            </View>
+          </ScrollView>
+
+          <View className={styles.editorFooter}>
+            <button className={styles.cancelBtn} onClick={() => setShowTemplateEditor(false)}>取消</button>
+            <button className={styles.saveBtn} onClick={handleSave}>保存</button>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const renderRadar = () => {
+    if (radarData.labels.length === 0 || radarData.datasets.length === 0) {
+      return (
+        <View className={styles.emptyRadar}>
+          <Text>请先选择候选人进行对比</Text>
+        </View>
+      );
+    }
+
+    const size = 300;
+    const cx = size / 2;
+    const cy = size / 2;
+    const radius = 120;
+    const levels = 5;
+    const angleStep = (Math.PI * 2) / radarData.labels.length;
+
+    const getPoint = (idx: number, value: number, max: number = 10) => {
+      const r = (value / max) * radius;
+      const angle = idx * angleStep - Math.PI / 2;
+      return {
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle)
+      };
+    };
+
+    const labelOffset = 140;
+    const getLabelPoint = (idx: number) => {
+      const angle = idx * angleStep - Math.PI / 2;
+      return {
+        x: cx + labelOffset * Math.cos(angle),
+        y: cy + labelOffset * Math.sin(angle)
+      };
+    };
+
+    return (
+      <View className={styles.radarContainer}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {[...Array(levels)].map((_, levelIdx) => {
+            const r = ((levelIdx + 1) / levels) * radius;
+            const points = radarData.labels.map((_, idx) => {
+              const angle = idx * angleStep - Math.PI / 2;
+              return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+            }).join(' ');
+            return (
+              <polygon
+                key={`grid-${levelIdx}`}
+                points={points}
+                fill="none"
+                stroke="#E5E6EB"
+                strokeWidth="1"
+              />
+            );
+          })}
+
+          {radarData.labels.map((_, idx) => {
+            const angle = idx * angleStep - Math.PI / 2;
+            const x2 = cx + radius * Math.cos(angle);
+            const y2 = cy + radius * Math.sin(angle);
+            return (
+              <line
+                key={`axis-${idx}`}
+                x1={cx}
+                y1={cy}
+                x2={x2}
+                y2={y2}
+                stroke="#E5E6EB"
+                strokeWidth="1"
+              />
+            );
+          })}
+
+          {radarData.datasets.map((dataset, dsIdx) => {
+            const points = dataset.values.map((v, idx) => {
+              const p = getPoint(idx, v);
+              return `${p.x},${p.y}`;
+            }).join(' ');
+
+            return (
+              <g key={`ds-${dsIdx}`}>
+                <polygon
+                  points={points}
+                  fill={dataset.color}
+                  fillOpacity="0.15"
+                  stroke={dataset.color}
+                  strokeWidth="2"
+                />
+                {dataset.values.map((v, idx) => {
+                  const p = getPoint(idx, v);
+                  return (
+                    <circle
+                      key={`pt-${dsIdx}-${idx}`}
+                      cx={p.x}
+                      cy={p.y}
+                      r="4"
+                      fill={dataset.color}
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
+
+          {radarData.labels.map((label, idx) => {
+            const p = getLabelPoint(idx);
+            return (
+              <text
+                key={`label-${idx}`}
+                x={p.x}
+                y={p.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="#4E5969"
+                fontSize="12"
+              >
+                {label}
+              </text>
+            );
+          })}
+        </svg>
+
+        <View className={styles.radarLegend}>
+          {radarData.datasets.map((ds, idx) => (
+            <View key={idx} className={styles.legendItem}>
+              <View className={styles.legendDot} style={{ background: ds.color }}></View>
+              <Text className={styles.legendText}>{ds.label}</Text>
             </View>
           ))}
         </View>
       </View>
+    );
+  };
+
+  return (
+    <ScrollView className={styles.container} scrollY>
+      <View className={styles.header}>
+        <Text className={styles.title}>对比分析</Text>
+        <Text className={styles.subtitle}>候选人对比 · 偏差校准 · 模板管理</Text>
+      </View>
+
+      <View className={styles.tabBar}>
+        <View
+          className={`${styles.tab} ${activeTab === 'compare' ? styles.active : ''}`}
+          onClick={() => setActiveTab('compare')}
+        >
+          <Text>📊 多人对比</Text>
+        </View>
+        <View
+          className={`${styles.tab} ${activeTab === 'calibration' ? styles.active : ''}`}
+          onClick={() => setActiveTab('calibration')}
+        >
+          <Text>🎯 偏差提醒</Text>
+        </View>
+        <View
+          className={`${styles.tab} ${activeTab === 'templates' ? styles.active : ''}`}
+          onClick={() => setActiveTab('templates')}
+        >
+          <Text>📋 模板库</Text>
+        </View>
+      </View>
 
       {activeTab === 'compare' && (
-        <View style={{ padding: `0 ${32}rpx` }}>
+        <>
           <View className={styles.compareHeader}>
-            <View className={styles.compareInfo}>
+            <View className={styles.compareTitleRow}>
+              <Text className={styles.compareTitle}>对比分析</Text>
               <Text className={styles.compareCount}>
-                已选择 <Text style={{ color: '#1E5EFF', fontWeight: 600 }}>{selectedCompareIds.length}</Text>/5 人
+                已选 {compareCandidateIds.length}/{maxCompareCount} 人
               </Text>
-              <Text className={styles.compareHint}>选择候选人进行横向对比</Text>
+              <View className={styles.headerActions}>
+                <Text className={styles.actionBtn} onClick={() => setShowEditor(true)}>
+                  编辑
+                </Text>
+                {compareCandidateIds.length > 0 && (
+                  <Text className={styles.actionBtn} onClick={clearCompareCandidates}>
+                    清空
+                  </Text>
+                )}
+              </View>
             </View>
-            <Button
-              className={styles.editBtn}
-              onClick={() => setShowSelector(true)}
-            >
-              编辑
-            </Button>
           </View>
 
-          {compareData.length > 0 ? (
-            <>
-              <View className={styles.sectionHeader}>
-                <Text className={styles.sectionTitle}>能力雷达对比</Text>
-              </View>
-              <View className={styles.radarWrapper}>
-                <RadarChart
-                  scores={compareData[0]?.scores || []}
-                  compareScores={compareData.length > 1 ? compareData[1]?.scores : undefined}
-                  candidates={compareData.map(d => d.candidate)}
-                />
-              </View>
-              <View className={styles.legend}>
-                {compareData.slice(0, 2).map((d, i) => (
-                  <View key={d.candidate.id} className={styles.legendItem}>
-                    <View
-                      className={styles.legendDot}
-                      style={{ backgroundColor: i === 0 ? '#1E5EFF' : '#00B8D9' }}
-                    />
-                    <Text className={styles.legendText}>{d.candidate.name}</Text>
-                  </View>
-                ))}
-              </View>
+          {renderRadar()}
 
-              <View className={styles.sectionHeader}>
-                <Text className={styles.sectionTitle}>维度评分对比</Text>
-              </View>
-              <ScrollView className={styles.compareTable} scrollX>
-                <View className={styles.tableInner}>
-                  <View className={styles.tableHeader}>
-                    <View className={styles.tableCellHeader}>
-                      <Text>维度</Text>
-                    </View>
-                    {compareData.map(d => (
-                      <View key={d.candidate.id} className={styles.tableCellHeader}>
-                        <Image
-                          className={styles.tableAvatar}
-                          src={d.candidate.avatar}
-                          mode="aspectFill"
-                        />
-                        <Text className={styles.tableName}>{d.candidate.name}</Text>
-                      </View>
-                    ))}
-                  </View>
-                  {mockCompetencies.map(comp => (
-                    <View key={comp.id} className={styles.tableRow}>
-                      <View className={styles.tableCell}>
-                        <Text className={styles.dimName}>{comp.name}</Text>
-                      </View>
-                      {compareData.map(d => {
-                        const score = d.scores.find(s => s.competencyId === comp.id)?.score || 0;
-                        return (
-                          <View key={d.candidate.id} className={styles.tableCell}>
-                            <Text
-                              className={styles.scoreText}
-                              style={{
-                                color: score >= 8 ? '#00B42A' :
-                                  score >= 6 ? '#1E5EFF' :
-                                    score >= 4 ? '#FF7D00' : '#F53F3F'
-                              }}
-                            >
-                              {score}
-                            </Text>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  ))}
-                  <View className={styles.tableRow}>
-                    <View className={styles.tableCell}>
-                      <Text className={styles.dimName}>综合</Text>
-                    </View>
-                    {compareData.map(d => (
-                      <View key={d.candidate.id} className={styles.tableCell}>
-                        <Text
-                          className={styles.scoreText}
-                          style={{ color: '#1E5EFF', fontWeight: 600 }}
-                        >
-                          {d.record?.overallScore || 70}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </ScrollView>
-
-              <View className={styles.sectionHeader}>
-                <Text className={styles.sectionTitle}>基本信息对比</Text>
-              </View>
-              {compareData.map(d => (
-                <View key={d.candidate.id} className={styles.infoCard}>
-                  <Image
-                    className={styles.infoAvatar}
-                    src={d.candidate.avatar}
-                    mode="aspectFill"
-                  />
-                  <View className={styles.infoContent}>
-                    <Text className={styles.infoName}>{d.candidate.name}</Text>
-                    <Text className={styles.infoPosition}>{d.candidate.position}</Text>
-                    <Text className={styles.infoMeta}>
-                      {d.candidate.experience}年 · {d.candidate.education} · {d.candidate.department}
-                    </Text>
-                    {d.record && (
-                      <View className={styles.infoScore}>
-                        <Text className={styles.infoScoreValue}>{d.record.overallScore}分</Text>
-                        <Text className={styles.infoRec}>
-                          {d.record.recommendation === 'strong-hire' ? '强烈推荐' :
-                            d.record.recommendation === 'hire' ? '推荐录用' :
-                              d.record.recommendation === 'borderline' ? '待定复核' : '不予录用'}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
+          <View className={styles.compareTable}>
+            <View className={styles.tableHeader}>
+              <Text className={styles.tableCell}>维度</Text>
+              {compareList.map(item => (
+                <Text key={item.candidate.id} className={styles.tableCell}>
+                  {item.candidate.name}
+                </Text>
               ))}
-            </>
-          ) : (
-            <View className={styles.emptyState}>
-              <Text className={styles.emptyIcon}>👥</Text>
-              <Text className={styles.emptyText}>请选择候选人进行对比</Text>
-              <Text className={styles.emptyDesc}>最多可选择5位候选人进行横向对比</Text>
-              <Button className={styles.emptyBtn} onClick={() => setShowSelector(true)}>
-                选择候选人
-              </Button>
             </View>
-          )}
-        </View>
+            {compareList.length > 0 && compareList[0].latestRecord?.scores.map((score, scoreIdx) => {
+              const template = templates.find(t => t.id === compareList[0].latestRecord!.templateId);
+              const comp = template?.competencies[scoreIdx];
+              return (
+                <View key={scoreIdx} className={styles.tableRow}>
+                  <Text className={styles.tableCell}>{comp?.name || `维度${scoreIdx + 1}`}</Text>
+                  {compareList.map(item => (
+                    <Text
+                      key={item.candidate.id}
+                      className={styles.tableCell}
+                      style={{
+                        color: item.latestRecord?.scores[scoreIdx]
+                          ? item.latestRecord.scores[scoreIdx].score >= 7 ? '#00B42A' : item.latestRecord.scores[scoreIdx].score <= 4 ? '#F53F3F' : '#1D2129'
+                          : '#86909C',
+                        fontWeight: 600
+                      }}
+                    >
+                      {item.latestRecord?.scores[scoreIdx]?.score || '-'}
+                    </Text>
+                  ))}
+                </View>
+              );
+            })}
+            <View className={styles.tableRow}>
+              <Text className={styles.tableCell} style={{ fontWeight: 600 }}>总分</Text>
+              {compareList.map(item => (
+                <Text
+                  key={item.candidate.id}
+                  className={styles.tableCell}
+                  style={{ fontWeight: 700, color: '#1E5EFF' }}
+                >
+                  {item.latestRecord?.overallScore || '-'}
+                </Text>
+              ))}
+            </View>
+            <View className={styles.tableRow}>
+              <Text className={styles.tableCell} style={{ fontWeight: 600 }}>建议</Text>
+              {compareList.map(item => (
+                <Text
+                  key={item.candidate.id}
+                  className={styles.tableCell}
+                >
+                  {item.latestRecord?.recommendation
+                    ? getRecommendationText(item.latestRecord.recommendation).split(' ')[1]
+                    : '-'}
+                </Text>
+              ))}
+            </View>
+          </View>
+
+          <View className={styles.compareCards}>
+            {compareList.map(item => (
+              <View key={item.candidate.id} className={styles.compareCard}>
+                <View className={styles.compareCardHeader}>
+                  <Text className={styles.compareCardName}>{item.candidate.name}</Text>
+                  <View
+                    className={styles.recBadge}
+                    style={{ background: item.latestRecord ? getRecommendationBgColor(item.latestRecord.recommendation) : '#F2F3F5' }}
+                  >
+                    <Text>{item.latestRecord ? getRecommendationText(item.latestRecord.recommendation) : '未面试'}</Text>
+                  </View>
+                </View>
+                <View className={styles.compareCardMeta}>
+                  <Text>{item.candidate.position}</Text>
+                  <Text>·</Text>
+                  <Text>{item.candidate.experience}年</Text>
+                  <Text>·</Text>
+                  <Text>{item.candidate.education}</Text>
+                </View>
+                {item.latestRecord && (
+                  <View className={styles.compareCardScore}>
+                    <Text className={styles.scoreNum}>{item.latestRecord.overallScore}</Text>
+                    <Text className={styles.scoreLabel}>分</Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        </>
       )}
 
-      {activeTab === 'deviation' && (
-        <View style={{ padding: `0 ${32}rpx` }}>
-          <View className={styles.sectionHeader}>
-            <Text className={styles.sectionTitle}>常见偏差提醒</Text>
-            <Text className={styles.sectionCount}>{mockDeviationAlerts.length}项</Text>
+      {activeTab === 'calibration' && (
+        <View className={styles.calibrationSection}>
+          <View className={styles.sectionTitle}>
+            <Text>🎯 常见偏差提醒</Text>
           </View>
-          {mockDeviationAlerts.map((alert, i) => (
-            <View key={i} className={styles.deviationCard}>
-              <View className={styles.deviationHeader}>
+          {alerts.map(alert => (
+            <View key={alert.id} className={styles.alertCard}>
+              <View className={styles.alertHeader}>
+                <View className={styles.alertTitle}>
+                  <View
+                    className={styles.severityDot}
+                    style={{ background: getSeverityColor(alert.severity) }}
+                  ></View>
+                  <Text className={styles.alertTitleText}>{alert.title}</Text>
+                </View>
                 <View
                   className={styles.severityBadge}
                   style={{
-                    backgroundColor: alert.severity === 'high' ? '#FFECE8' :
-                      alert.severity === 'medium' ? '#FFF7E6' : '#E8F3FF',
-                    color: alert.severity === 'high' ? '#F53F3F' :
-                      alert.severity === 'medium' ? '#FF7D00' : '#1E5EFF'
+                    background: alert.severity === 'high' ? '#FFECE8' : alert.severity === 'medium' ? '#FFF7E8' : '#E8F3FF',
+                    color: getSeverityColor(alert.severity)
                   }}
                 >
-                  {alert.severity === 'high' ? '严重' : alert.severity === 'medium' ? '中等' : '轻微'}
+                  <Text>{alert.severity === 'high' ? '高风险' : alert.severity === 'medium' ? '中风险' : '低风险'}</Text>
                 </View>
-                <Text className={styles.deviationTitle}>{alert.title}</Text>
               </View>
-              <Text className={styles.deviationDesc}>{alert.description}</Text>
-              <View className={styles.deviationSuggestion}>
-                <Text className={styles.suggestionLabel}>校准建议：</Text>
-                <Text className={styles.suggestionText}>{alert.calibrationTip}</Text>
+              <Text className={styles.alertDesc}>{alert.description}</Text>
+              <View className={styles.alertTip}>
+                <Text className={styles.tipIcon}>💡</Text>
+                <Text className={styles.tipText}>{alert.calibrationTip}</Text>
               </View>
             </View>
           ))}
@@ -301,177 +689,89 @@ const AnalysisPage: React.FC = () => {
       )}
 
       {activeTab === 'templates' && (
-        <View style={{ padding: `0 ${32}rpx` }}>
-          <View className={styles.templateHeader}>
-            <View className={styles.templateInfo}>
-              <Text className={styles.templateCount}>共 {templates.length} 个模板</Text>
-            </View>
-            <Button className={styles.createBtn} onClick={() => setShowCreateTpl(true)}>
-              + 创建
-            </Button>
+        <View className={styles.templatesSection}>
+          <View className={styles.sectionHeader}>
+            <Text className={styles.sectionTitle}>📋 模板库</Text>
+            <Text className={styles.addBtn} onClick={handleCreateTemplate}>+ 创建</Text>
           </View>
 
-          {templates.map(tpl => (
-            <View key={tpl.id} className={styles.templateCard}>
-              <View className={styles.templateTop}>
-                <View className={styles.templateMain}>
-                  <Text className={styles.templateName}>{tpl.name}</Text>
-                  {tpl.isDefault && (
-                    <View className={styles.defaultBadge}>默认</View>
+          {templates.map(template => (
+            <View key={template.id} className={styles.templateCard}>
+              <View className={styles.templateCardHeader}>
+                <View>
+                  <Text className={styles.templateName}>{template.name}</Text>
+                  {currentTemplateId === template.id && (
+                    <View className={styles.inUseBadge}>
+                      <Text>使用中</Text>
+                    </View>
                   )}
                 </View>
-                <Text className={styles.templatePosition}>{tpl.position}</Text>
-              </View>
-              <Text className={styles.templateDesc}>{tpl.description}</Text>
-              <View className={styles.templateMeta}>
-                <Text className={styles.metaItem}>
-                  {tpl.competencies?.length || 0} 个能力维度
-                </Text>
-                <Text className={styles.metaItem}>
-                  {tpl.requiredQuestions?.length || 0} 道必问题
-                </Text>
-                <Text className={styles.metaItem}>
-                  {tpl.followupQuestions?.length || 0} 道追问题
-                </Text>
-              </View>
-              <View className={styles.templateFooter}>
-                <Text className={styles.usageCount}>已使用 {tpl.usageCount || 0} 次</Text>
                 <View className={styles.templateActions}>
-                  <Button className={styles.actionBtn} onClick={() => handleCopyTemplate(tpl)}>
-                    复制
-                  </Button>
-                  <Button
-                    className={classnames(styles.actionBtn, styles.primaryAction)}
-                    onClick={() => handleUseTemplate(tpl.id)}
-                  >
-                    使用
-                  </Button>
+                  <Text className={styles.actionLink} onClick={() => handleEditTemplate(template.id)}>编辑</Text>
+                  <Text className={styles.actionLink} onClick={() => handleDuplicateTemplate(template.id)}>复制</Text>
+                  <Text className={styles.actionLinkDanger} onClick={() => handleDeleteTemplate(template.id)}>删除</Text>
                 </View>
               </View>
+              <Text className={styles.templateDesc}>{template.position} · {template.department}</Text>
+              <Text className={styles.templateDesc2}>{template.description}</Text>
+              <View className={styles.templateStats}>
+                <Text>📊 {template.competencies.length} 维度</Text>
+                <Text>❓ {template.requiredQuestions.length + template.followupQuestions.length} 题</Text>
+                <Text>📋 使用 {template.usageCount} 次</Text>
+              </View>
+              {currentTemplateId !== template.id && (
+                <button className={styles.useTemplateBtn} onClick={() => handleUseTemplate(template.id)}>
+                  使用此模板
+                </button>
+              )}
             </View>
           ))}
         </View>
       )}
 
-      {showSelector && (
-        <View className={styles.modalMask} onClick={() => setShowSelector(false)}>
-          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      {showEditor && (
+        <View className={styles.modalOverlay} onClick={() => setShowEditor(false)}>
+          <View className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <View className={styles.modalHeader}>
-              <Text className={styles.modalTitle}>选择对比候选人</Text>
-              <Text className={styles.modalClose} onClick={() => setShowSelector(false)}>×</Text>
+              <Text className={styles.modalTitle}>选择候选人</Text>
+              <Text className={styles.modalSubtitle}>
+                已选 {compareCandidateIds.length}/{maxCompareCount} 人
+              </Text>
+              <Text className={styles.closeBtn} onClick={() => setShowEditor(false)}>×</Text>
             </View>
-            <View className={styles.selectorTip}>
-              已选 {selectedCompareIds.length}/5 人，点击卡片选择/取消
-            </View>
-            <ScrollView className={styles.selectorList} scrollY>
-              {candidates.map(c => (
-                <CandidateCard
-                  key={c.id}
-                  candidate={c}
-                  showSelect
-                  isSelected={selectedCompareIds.includes(c.id)}
-                />
-              ))}
+            <ScrollView className={styles.modalBody} scrollY>
+              {candidates.map(c => {
+                const isSelected = compareCandidateIds.includes(c.id);
+                return (
+                  <View
+                    key={c.id}
+                    className={`${styles.candidateSelectCard} ${isSelected ? styles.selected : ''}`}
+                    onClick={() => handleToggleCandidate(c.id)}
+                  >
+                    <View className={styles.candidateAvatar}>{c.name.charAt(0)}</View>
+                    <View className={styles.candidateInfo}>
+                      <Text className={styles.candidateName}>{c.name}</Text>
+                      <Text className={styles.candidatePosition}>
+                        {c.position} · {c.experience}年 · {c.education}
+                      </Text>
+                    </View>
+                    <View className={styles.checkBox}>
+                      {isSelected && <Text>✓</Text>}
+                    </View>
+                  </View>
+                );
+              })}
             </ScrollView>
             <View className={styles.modalFooter}>
-              <Button
-                className={classnames(styles.modalBtn, styles.cancelBtn)}
-                onClick={() => setShowSelector(false)}
-              >
-                取消
-              </Button>
-              <Button
-                className={classnames(styles.modalBtn, styles.confirmBtn)}
-                onClick={() => setShowSelector(false)}
-              >
+              <button className={styles.confirmBtn} onClick={() => setShowEditor(false)}>
                 确定
-              </Button>
+              </button>
             </View>
           </View>
         </View>
       )}
 
-      {showCreateTpl && (
-        <View className={styles.modalMask} onClick={() => setShowCreateTpl(false)}>
-          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <View className={styles.modalHeader}>
-              <Text className={styles.modalTitle}>创建面试模板</Text>
-              <Text className={styles.modalClose} onClick={() => setShowCreateTpl(false)}>×</Text>
-            </View>
-
-            <View style={{ padding: '0 32rpx' }}>
-              <View className={styles.formGroup}>
-                <Text className={styles.formLabel}>模板名称 <Text style={{ color: '#F53F3F' }}>*</Text></Text>
-                <Input
-                  className={styles.formInput}
-                  placeholder="如：高级前端标准面试"
-                  value={tplForm.name}
-                  onInput={(e) => setTplForm(p => ({ ...p, name: e.detail.value }))}
-                />
-              </View>
-
-              <View className={styles.formGroup}>
-                <Text className={styles.formLabel}>适用岗位 <Text style={{ color: '#F53F3F' }}>*</Text></Text>
-                <Input
-                  className={styles.formInput}
-                  placeholder="如：高级前端工程师"
-                  value={tplForm.position}
-                  onInput={(e) => setTplForm(p => ({ ...p, position: e.detail.value }))}
-                />
-              </View>
-
-              <View className={styles.formGroup}>
-                <Text className={styles.formLabel}>适用部门</Text>
-                <Input
-                  className={styles.formInput}
-                  placeholder="如：技术部"
-                  value={tplForm.department}
-                  onInput={(e) => setTplForm(p => ({ ...p, department: e.detail.value }))}
-                />
-              </View>
-
-              <View className={styles.formGroup}>
-                <Text className={styles.formLabel}>模板描述</Text>
-                <Textarea
-                  className={styles.formTextarea}
-                  placeholder="简要描述该模板的适用场景、考察重点等"
-                  value={tplForm.description}
-                  onInput={(e) => setTplForm(p => ({ ...p, description: e.detail.value }))}
-                />
-              </View>
-
-              <View className={styles.tplConfig}>
-                <Text className={styles.configTitle}>能力维度（默认6项）</Text>
-                <View className={styles.configList}>
-                  {mockCompetencies.map(comp => (
-                    <View key={comp.id} className={styles.configItem}>
-                      <Text className={styles.configName}>{comp.name}</Text>
-                      <Text className={styles.configWeight}>权重 {comp.weight}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </View>
-
-            <View className={styles.modalFooter}>
-              <Button
-                className={classnames(styles.modalBtn, styles.cancelBtn)}
-                onClick={() => setShowCreateTpl(false)}
-              >
-                取消
-              </Button>
-              <Button
-                className={classnames(styles.modalBtn, styles.confirmBtn)}
-                onClick={handleCreateTemplate}
-              >
-                创建模板
-              </Button>
-            </View>
-          </View>
-        </View>
-      )}
-    </View>
+      {showTemplateEditor && <TemplateEditorContent />}
+    </ScrollView>
   );
-};
-
-export default AnalysisPage;
+}

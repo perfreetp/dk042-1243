@@ -51,16 +51,6 @@ export const getStatusColor = (status: string): string => {
   return map[status] || '#86909C';
 };
 
-export const getRecommendationText = (rec: string): string => {
-  const map: Record<string, string> = {
-    'strong-hire': '强烈推荐',
-    'hire': '推荐录用',
-    'borderline': '待定复核',
-    'no-hire': '不予录用'
-  };
-  return map[rec] || rec;
-};
-
 export const getRecommendationColor = (rec: string): string => {
   const map: Record<string, string> = {
     'strong-hire': '#00B42A',
@@ -80,6 +70,24 @@ export const getRecommendationBgColor = (rec: string): string => {
   };
   return map[rec] || '#F2F3F5';
 };
+
+export const getRecommendationText = (rec: string): string => {
+  const map: Record<string, string> = {
+    'strong-hire': '✅ 强烈推荐录用',
+    'hire': '👍 推荐录用',
+    'borderline': '⚖️  待定',
+    'no-hire': '❌ 不推荐'
+  };
+  return map[rec] || '未知';
+};
+
+export const RADAR_COLORS = [
+  '#667eea',
+  '#f093fb',
+  '#4facfe',
+  '#43e97b',
+  '#fa709a'
+];
 
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
