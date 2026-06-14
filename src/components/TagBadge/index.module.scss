@@ -1,0 +1,70 @@
+@use '@/styles/variables.scss' as *;
+
+.tagBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+
+  &.sm {
+    padding: 4rpx 16rpx;
+    border-radius: $radius-sm;
+  }
+
+  &.md {
+    padding: 8rpx 24rpx;
+    border-radius: $radius-md;
+  }
+
+  .tagText {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    line-height: 1.4;
+  }
+
+  &.default {
+    background: rgba(134, 144, 156, 0.1);
+    .tagText { color: $color-text-tertiary; }
+  }
+
+  &.primary {
+    background: rgba(30, 94, 255, 0.1);
+    .tagText { color: $color-primary; }
+  }
+
+  &.success {
+    background: rgba(0, 180, 42, 0.1);
+    .tagText { color: $color-success; }
+  }
+
+  &.warning {
+    background: rgba(255, 125, 0, 0.1);
+    .tagText { color: $color-warning; }
+  }
+
+  &.error {
+    background: rgba(245, 63, 63, 0.1);
+    .tagText { color: $color-error; }
+  }
+
+  &.info {
+    background: rgba(0, 184, 217, 0.1);
+    .tagText { color: $color-secondary; }
+  }
+
+  &.highlight {
+    background: $color-bg-highlight;
+    .tagText { color: $color-warning; }
+  }
+
+  &.doubt {
+    background: $color-bg-doubt;
+    .tagText { color: $color-primary; }
+  }
+
+  &.risk {
+    background: $color-bg-risk;
+    .tagText { color: $color-error; }
+  }
+}

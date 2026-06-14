@@ -1,0 +1,140 @@
+@use '@/styles/variables.scss' as *;
+
+.scoreSlider {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.competencyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.competencyName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.competencyWeight {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.scoreDisplay {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: $spacing-xs;
+}
+
+.scoreValue {
+  font-size: 56rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+}
+
+.scoreMax {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-medium;
+}
+
+.levelTag {
+  padding: 6rpx 16rpx;
+  border-radius: $radius-xs;
+  margin-left: $spacing-sm;
+
+  text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.sliderWrapper {
+  padding: 0 $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.scaleMarks {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 4rpx;
+  padding: 0 4rpx;
+}
+
+.scaleText {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.competencyDesc {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-xs;
+}
+
+.descLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+}
+
+.descText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  flex: 1;
+}
+
+.reasonSection {
+  position: relative;
+}
+
+.reasonLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.reasonInput {
+  width: 100%;
+  min-height: 120rpx;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  box-sizing: border-box;
+  padding-bottom: 48rpx;
+}
+
+.reasonCount {
+  position: absolute;
+  right: $spacing-md;
+  bottom: $spacing-md;
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}

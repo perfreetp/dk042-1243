@@ -1,0 +1,247 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: $spacing-xl;
+  background: linear-gradient(180deg, #EEF2FF 0%, $color-bg-page 350rpx);
+}
+
+.statsCards {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.statsItem {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statsValue {
+  font-size: 44rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+  display: block;
+}
+
+.statsLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  display: block;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.searchBox {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  padding: 0 $spacing-lg;
+  height: 80rpx;
+  box-shadow: $shadow-card;
+}
+
+.searchIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+  color: $color-text-tertiary;
+}
+
+.searchInput {
+  flex: 1;
+  height: 100%;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.exportBtn {
+  @include button-reset;
+  height: 80rpx;
+  padding: 0 $spacing-lg;
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+  box-shadow: 0 4rpx 16rpx rgba(0, 184, 217, 0.25);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.filterTabs {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.filterTab {
+  display: inline-flex;
+  padding: 12rpx 28rpx;
+  border-radius: $radius-button;
+  background: $color-bg-card;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+    box-shadow: 0 4rpx 12rpx rgba(30, 94, 255, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.deviationAlert {
+  background: linear-gradient(135deg, #FFF7E6 0%, #FFF3DC 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-lg;
+  border-left: 8rpx solid $color-warning;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.alertLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+  min-width: 0;
+}
+
+.alertIcon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.alertContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.alertTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.alertDesc {
+  font-size: $font-size-xs;
+  color: $color-warning;
+}
+
+.alertAction {
+  flex-shrink: 0;
+  padding: 8rpx 24rpx;
+  background: $color-warning;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  padding: 0 $spacing-xs;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  background: rgba(134, 144, 156, 0.1);
+  padding: 4rpx 16rpx;
+  border-radius: $radius-xs;
+}
+
+.reviewSection {
+  margin-bottom: $spacing-lg;
+}
+
+.reviewTitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+  padding: 0 $spacing-xs;
+
+  text {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .count {
+    background: rgba(255, 125, 0, 0.1);
+    color: $color-warning;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    padding: 4rpx 20rpx;
+    border-radius: $radius-button;
+  }
+}
+
+.emptyState {
+  padding: $spacing-xl * 2;
+  text-align: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  line-height: $line-height-normal;
+}

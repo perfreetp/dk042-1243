@@ -1,0 +1,48 @@
+@use '@/styles/variables.scss' as *;
+
+.radarChart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+
+  svg {
+    overflow: visible;
+  }
+}
+
+.legend {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-xl;
+  margin-top: $spacing-md;
+}
+
+.legendItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.legendDot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: $radius-xs;
+
+  &.dotPrimary {
+    background: $color-primary;
+  }
+
+  &.dotSecondary {
+    background: $color-secondary;
+  }
+}
+
+.legendText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}

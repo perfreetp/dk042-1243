@@ -1,0 +1,144 @@
+@use '@/styles/variables.scss' as *;
+
+.candidateCard {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: $shadow-card-hover;
+  }
+
+  &.selected {
+    border-color: $color-primary;
+    background: linear-gradient(135deg, #EEF2FF 0%, $color-bg-card 60%);
+  }
+}
+
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-sm;
+  border: 2rpx solid $color-border;
+  margin-right: $spacing-md;
+  margin-top: 4rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-card;
+  flex-shrink: 0;
+
+  &.checked {
+    background: $color-primary;
+    border-color: $color-primary;
+
+    .checkMark {
+      color: $color-text-white;
+      font-size: $font-size-sm;
+      font-weight: bold;
+    }
+  }
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-lg;
+  margin-right: $spacing-lg;
+  flex-shrink: 0;
+  background: $color-bg-hover;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
+.name {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.statusTag {
+  padding: 6rpx 16rpx;
+  border-radius: $radius-xs;
+
+  text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.positionRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
+.position {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.round {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.meta {
+  margin-bottom: $spacing-sm;
+}
+
+.metaText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.appliedAt {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.action {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}

@@ -1,0 +1,304 @@
+@use '@/styles/variables.scss' as *;
+
+.questionCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  border-left: 8rpx solid $color-border;
+  transition: all $transition-base;
+
+  &.active {
+    border-left-color: $color-primary;
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.questionIndex {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.questionMeta {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+}
+
+.questionContent {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+  margin-bottom: $spacing-md;
+}
+
+.scoringGuide {
+  background: linear-gradient(135deg, #EEF2FF 0%, #F0F7FF 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border-left: 4rpx solid $color-primary-light;
+}
+
+.guideLabel {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.guideText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.answerSection {
+  margin-top: $spacing-lg;
+  padding-top: $spacing-lg;
+  border-top: 1rpx solid $color-divider;
+}
+
+.aiSection {
+  background: linear-gradient(135deg, #E6FAFB 0%, #F0FFFF 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+  border: 1rpx solid rgba(0, 184, 217, 0.2);
+}
+
+.aiHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.aiBadge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.aiIcon {
+  font-size: 32rpx;
+}
+
+.aiTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-secondary;
+}
+
+.aiClose {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.aiSuggestionScroll {
+  white-space: nowrap;
+}
+
+.aiSuggestionList {
+  display: inline-flex;
+  flex-direction: row;
+  gap: $spacing-md;
+}
+
+.aiSuggestionCard {
+  display: inline-flex;
+  flex-direction: column;
+  width: 520rpx;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  box-shadow: 0 2rpx 8rpx rgba(0, 184, 217, 0.08);
+  white-space: normal;
+  flex-shrink: 0;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 4rpx 16rpx rgba(0, 184, 217, 0.15);
+  }
+}
+
+.aiSugHeader {
+  margin-bottom: $spacing-sm;
+}
+
+.aiSugContent {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-sm;
+  font-weight: $font-weight-medium;
+}
+
+.aiSugReason {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  line-height: $line-height-normal;
+}
+
+.answerLabel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+
+  text:first-child {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+}
+
+.charCount {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.answerInput {
+  width: 100%;
+  min-height: 160rpx;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+  box-sizing: border-box;
+  margin-bottom: $spacing-lg;
+}
+
+.recordSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.recordGroup {}
+
+.recordHeader {
+  margin-bottom: $spacing-sm;
+}
+
+.recordTitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-xs;
+
+  text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+}
+
+.recordIcon {
+  font-size: 28rpx;
+  width: 36rpx;
+  text-align: center;
+}
+
+.recordTags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.recordTag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 8rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+
+  text {
+    font-size: $font-size-sm;
+  }
+
+  &.tagHighlight {
+    background: $color-bg-highlight;
+    text { color: $color-warning; }
+  }
+
+  &.tagDoubt {
+    background: $color-bg-doubt;
+    text { color: $color-primary; }
+  }
+
+  &.tagRisk {
+    background: $color-bg-risk;
+    text { color: $color-error; }
+  }
+}
+
+.tagClose {
+  font-size: $font-size-md;
+  font-weight: bold;
+  margin-left: 4rpx;
+  opacity: 0.6;
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.inputRow {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: $spacing-sm;
+}
+
+.tagInput {
+  flex: 1;
+  min-height: 64rpx;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: 16rpx $spacing-md;
+  font-size: $font-size-sm;
+  box-sizing: border-box;
+}
+
+.addBtn {
+  @include button-reset;
+  width: 120rpx;
+  height: 64rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-md;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}

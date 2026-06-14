@@ -1,0 +1,230 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: 200rpx;
+  background: linear-gradient(180deg, #EEF2FF 0%, $color-bg-page 350rpx);
+}
+
+.candidateHeader {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: 0 8rpx 32rpx rgba(30, 94, 255, 0.2);
+}
+
+.headerTop {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: $radius-md;
+  margin-right: $spacing-md;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: 4rpx;
+}
+
+.position {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.timerBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+}
+
+.timerLabel {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.timerValue {
+  font-size: 36rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  font-family: monospace;
+}
+
+.headerMeta {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6rpx;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8rpx 20rpx;
+  border-radius: $radius-button;
+
+  text {
+    font-size: $font-size-xs;
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+.progressSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.progressHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.progressTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.progressText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.progressBar {
+  height: 16rpx;
+  background: $color-bg-page;
+  border-radius: $radius-round;
+  overflow: hidden;
+  margin-bottom: $spacing-md;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, $color-primary 0%, $color-secondary 100%);
+  border-radius: $radius-round;
+  transition: width $transition-slow ease;
+}
+
+.questionNav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.navDot {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-md;
+  background: $color-bg-page;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-tertiary;
+  transition: all $transition-base;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+    box-shadow: 0 4rpx 12rpx rgba(30, 94, 255, 0.25);
+    transform: scale(1.05);
+  }
+
+  &.answered {
+    background: rgba(0, 180, 42, 0.1);
+    color: $color-success;
+  }
+}
+
+.questionSection {
+  margin-bottom: $spacing-md;
+}
+
+.bottomBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  align-items: center;
+  z-index: 100;
+}
+
+.navButton {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-base;
+
+  &.prevBtn {
+    background: $color-bg-page;
+    color: $color-text-secondary;
+    border: 2rpx solid $color-border;
+
+    &:active {
+      background: $color-bg-hover;
+      transform: scale(0.96);
+    }
+  }
+
+  &.nextBtn {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+    box-shadow: 0 6rpx 20rpx rgba(30, 94, 255, 0.25);
+
+    &:active {
+      opacity: 0.9;
+      transform: scale(0.96);
+    }
+  }
+
+  &.finishBtn {
+    background: linear-gradient(135deg, $color-success 0%, $color-success-light 100%);
+    color: $color-text-white;
+    box-shadow: 0 6rpx 20rpx rgba(0, 180, 42, 0.25);
+
+    &:active {
+      opacity: 0.9;
+      transform: scale(0.96);
+    }
+  }
+}

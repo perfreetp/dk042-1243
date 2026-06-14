@@ -1,0 +1,166 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: $spacing-xl * 2;
+  background: linear-gradient(180deg, #EEF2FF 0%, $color-bg-page 400rpx);
+}
+
+.statsRow {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.statCard {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.statValue {
+  font-size: 48rpx;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1.2;
+  display: block;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  display: block;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.searchBox {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  padding: 0 $spacing-lg;
+  height: 80rpx;
+  box-shadow: $shadow-card;
+}
+
+.searchIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+  color: $color-text-tertiary;
+}
+
+.searchInput {
+  flex: 1;
+  height: 100%;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.importBtn {
+  @include button-reset;
+  height: 80rpx;
+  padding: 0 $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+  box-shadow: 0 4rpx 16rpx rgba(30, 94, 255, 0.25);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.filterTabs {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+  flex-wrap: wrap;
+}
+
+.filterTab {
+  padding: 12rpx 28rpx;
+  border-radius: $radius-button;
+  background: $color-bg-card;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+    box-shadow: 0 4rpx 12rpx rgba(30, 94, 255, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  padding: 0 $spacing-xs;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  background: rgba(134, 144, 156, 0.1);
+  padding: 4rpx 16rpx;
+  border-radius: $radius-xs;
+}
+
+.emptyState {
+  padding: $spacing-xl * 2;
+  text-align: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  line-height: $line-height-normal;
+}

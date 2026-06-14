@@ -1,0 +1,319 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: 240rpx;
+  background: linear-gradient(180deg, #EEF2FF 0%, $color-bg-page 350rpx);
+}
+
+.candidateInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: $radius-md;
+  margin-right: $spacing-md;
+  background: $color-bg-hover;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.position {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: 4rpx;
+}
+
+.tagRow {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+}
+
+.overallScoreCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: 0 8rpx 32rpx rgba(30, 94, 255, 0.2);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scoreLeft {
+  flex: 1;
+}
+
+.scoreLabel {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: $spacing-sm;
+}
+
+.scoreMain {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.scoreValue {
+  font-size: 96rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  line-height: 1;
+  font-family: monospace;
+}
+
+.scoreMax {
+  font-size: $font-size-xl;
+  color: rgba(255, 255, 255, 0.7);
+  margin-left: 8rpx;
+  font-weight: $font-weight-medium;
+}
+
+.scoreHint {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: $spacing-xs;
+}
+
+.scoreRight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.levelBadge {
+  padding: 12rpx 32rpx;
+  border-radius: $radius-button;
+  background: rgba(255, 255, 255, 0.2);
+  margin-bottom: $spacing-sm;
+}
+
+.levelText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}
+
+.rankText {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  padding: 0 $spacing-xs;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-xs;
+
+  .badge {
+    background: rgba(30, 94, 255, 0.1);
+    color: $color-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    padding: 4rpx 16rpx;
+    border-radius: $radius-xs;
+  }
+}
+
+.sectionAction {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.recommendationSection {
+  margin-bottom: $spacing-lg;
+}
+
+.recOptions {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+}
+
+.recOption {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-sm;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 3rpx solid transparent;
+  transition: all $transition-base;
+
+  &.active {
+    border-color: currentColor;
+    transform: translateY(-4rpx);
+    box-shadow: $shadow-card-hover;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.recIcon {
+  font-size: 48rpx;
+  margin-bottom: $spacing-xs;
+}
+
+.recLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 4rpx;
+}
+
+.recDesc {
+  font-size: 20rpx;
+  opacity: 0.7;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.summarySection {
+  margin-bottom: $spacing-lg;
+}
+
+.summaryCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.summaryLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.summaryInput {
+  width: 100%;
+  min-height: 200rpx;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+  box-sizing: border-box;
+}
+
+.summaryTools {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-sm;
+}
+
+.aiGenBtn {
+  @include button-reset;
+  padding: 8rpx 24rpx;
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.charCount {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.bottomBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  align-items: center;
+  z-index: 100;
+}
+
+.bottomInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.bottomLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.bottomValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.submitBtn {
+  @include button-reset;
+  height: $button-height-lg;
+  padding: 0 $spacing-xl * 1.5;
+  background: linear-gradient(135deg, $color-success 0%, $color-success-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 6rpx 20rpx rgba(0, 180, 42, 0.25);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
